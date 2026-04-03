@@ -62,50 +62,43 @@ nav.scrolled { padding: 0.7rem 2.5rem; box-shadow: 0 2px 30px rgba(61,50,40,0.05
 /* ─── ANNOUNCEMENT ─── */
 .announcement { background: var(--earth); color: var(--sand); text-align: center; padding: 0.55rem 1rem; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 400; position: fixed; top: 0; left: 0; right: 0; z-index: 101; }
 
-/* ─── HERO ─── */
-.hero { padding: 0; margin-top: 28px; position: relative; overflow: hidden; height: 150px; }
-.hero-bg { position: absolute; inset: 0; background: url("../assets/bg_hero.webp") center/cover no-repeat; }
-.hero-bg::after { content: ''; position: absolute; inset: 0; background: rgba(61,50,40,0.35); }
-.hero-inner { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; width: 100%; display: flex; align-items: center; justify-content: space-between; height: 100%; padding: 0 2.5rem; }
-.hero-text h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 300; line-height: 1.15; letter-spacing: -0.01em; color: var(--cream); }
-.hero-text h1 em { font-style: italic; color: var(--sage-light); font-weight: 300; }
-.hero-sub { display: none; }
-.hero-ctas { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+/* ─── BANNER ─── */
+.banner { width: 100%; }
+
+/* ─── BUTTONS ─── */
 .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.4rem; font-family: var(--font-body); font-size: 0.62rem; letter-spacing: 0.13em; text-transform: uppercase; text-decoration: none; font-weight: 500; border: none; cursor: pointer; transition: all 0.35s ease; }
-.btn-dark { background: var(--cream); color: var(--earth); }
-.btn-dark:hover { background: var(--sage-light); }
-.btn-outline { background: transparent; color: var(--cream); border: 1px solid rgba(250,247,242,0.6); }
-.btn-outline:hover { background: var(--cream); color: var(--earth); }
-.hero-feature { display: none; }
-.hero-badge { display: none; }
+.btn-dark { background: var(--earth); color: var(--cream); }
+.btn-dark:hover { background: var(--sage-deep); }
+.btn-outline { background: transparent; color: var(--earth); border: 1px solid var(--earth); }
+.btn-outline:hover { background: var(--earth); color: var(--cream); }
 
 /* ─── PRODUCTS ─── */
-.products { padding: 1.5rem 2.5rem 5rem; max-width: 1400px; margin: 0 auto; }
-.products-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-.products-heading { font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 300; }
+.products { padding: 1.2rem 2.5rem 4rem; max-width: 1400px; margin: 0 auto; }
+.products-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+.products-heading { font-family: var(--font-display); font-size: 1.6rem; font-weight: 300; }
 .products-heading em { font-style: italic; color: var(--sage-deep); }
-.filters { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.filter-btn { padding: 0.5rem 1.2rem; font-family: var(--font-body); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; border: 1px solid var(--sand-dark); background: transparent; color: var(--earth-mid); cursor: pointer; transition: all 0.3s; }
+.filters { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.filter-btn { padding: 0.4rem 1rem; font-family: var(--font-body); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; border: 1px solid var(--sand-dark); background: transparent; color: var(--earth-mid); cursor: pointer; transition: all 0.3s; }
 .filter-btn:hover, .filter-btn.active { background: var(--earth); color: var(--cream); border-color: var(--earth); }
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem; }
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
 
 /* CARD */
 .card { background: white; border: 1px solid rgba(61,50,40,0.05); overflow: hidden; transition: all 0.45s ease; position: relative; }
-.card:hover { transform: translateY(-4px); box-shadow: 0 18px 50px rgba(61,50,40,0.09); }
-.card-img { aspect-ratio: 1/1.15; overflow: hidden; position: relative; cursor: pointer; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(61,50,40,0.09); }
+.card-img { aspect-ratio: 1/1; overflow: hidden; position: relative; cursor: pointer; }
 .card-img-inner { width: 100%; height: 100%; transition: transform 0.7s ease; }
 .card-img-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card:hover .card-img-inner { transform: scale(1.03); }
-.card-quick { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.7rem; display: flex; justify-content: center; transform: translateY(100%); transition: transform 0.35s ease; }
+.card-quick { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.5rem; display: flex; justify-content: center; transform: translateY(100%); transition: transform 0.35s ease; }
 .card:hover .card-quick { transform: translateY(0); }
-.quick-add { width: 100%; padding: 0.7rem; background: rgba(61,50,40,0.92); color: var(--cream); border: none; font-family: var(--font-body); font-size: 0.63rem; letter-spacing: 0.13em; text-transform: uppercase; font-weight: 500; cursor: pointer; backdrop-filter: blur(10px); transition: background 0.3s; }
+.quick-add { width: 100%; padding: 0.55rem; background: rgba(61,50,40,0.92); color: var(--cream); border: none; font-family: var(--font-body); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; cursor: pointer; backdrop-filter: blur(10px); transition: background 0.3s; }
 .quick-add:hover { background: rgba(90,107,79,0.95); }
-.card-body { padding: 1.1rem 1.2rem 1.3rem; }
-.card-tags { font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sage); font-weight: 500; margin-bottom: 0.4rem; }
-.card-name { font-family: var(--font-display); font-size: 1.15rem; font-weight: 400; margin-bottom: 0.25rem; cursor: pointer; }
+.card-body { padding: 0.7rem 0.8rem 0.8rem; }
+.card-tags { font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sage); font-weight: 500; margin-bottom: 0.25rem; }
+.card-name { font-family: var(--font-display); font-size: 1rem; font-weight: 400; margin-bottom: 0.15rem; cursor: pointer; }
 .card-name:hover { color: var(--sage-deep); }
-.card-desc { font-size: 0.76rem; color: var(--smoke); font-weight: 300; font-style: italic; line-height: 1.5; margin-bottom: 0.8rem; min-height: 2.3em; }
-.card-price { font-family: var(--font-display); font-size: 1.1rem; font-weight: 500; }
+.card-desc { font-size: 0.68rem; color: var(--smoke); font-weight: 300; font-style: italic; line-height: 1.45; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-price { font-family: var(--font-display); font-size: 1rem; font-weight: 500; }
 
 /* ─── MID BANNER ─── */
 .mid-banner { padding: 5rem 2.5rem; background: var(--earth); color: var(--sand); }
@@ -237,7 +230,7 @@ footer { padding: 3.5rem 2.5rem 1.5rem; background: var(--obsidian); color: var(
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1024px) {
-  .grid { grid-template-columns: repeat(3, 1fr); }
+  .grid { grid-template-columns: repeat(4, 1fr); }
   .kits-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .modal { grid-template-columns: 1fr; }
@@ -248,21 +241,18 @@ footer { padding: 3.5rem 2.5rem 1.5rem; background: var(--obsidian); color: var(
   nav { padding: 0.9rem 1.2rem; }
   nav.scrolled { padding: 0.7rem 1.2rem; }
   .nav-center { display: none; }
-  .hero { height: 120px; }
-  .hero-inner { padding: 0 1.2rem; }
-  .hero-text h1 { font-size: 1.3rem; }
-  .hero-ctas .btn { padding: 0.5rem 1rem; font-size: 0.55rem; }
-  .products { padding: 1.2rem 1.2rem 3rem; }
-  .products-top { flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; }
-  .products-heading { font-size: 1.4rem; }
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
-  .card-body { padding: 0.8rem; }
-  .card-tags { font-size: 0.5rem; margin-bottom: 0.2rem; }
-  .card-name { font-size: 0.95rem; }
-  .card-desc { font-size: 0.68rem; min-height: auto; margin-bottom: 0.4rem; }
-  .card-price { font-size: 0.95rem; }
-  .filters { gap: 0.3rem; }
-  .filter-btn { padding: 0.4rem 0.8rem; font-size: 0.58rem; }
+  .banner { height: 80px !important; }
+  .products { padding: 1rem 0.8rem 3rem; }
+  .products-top { flex-direction: column; align-items: flex-start; margin-bottom: 0.8rem; }
+  .products-heading { font-size: 1.3rem; }
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .card-body { padding: 0.5rem 0.6rem 0.6rem; }
+  .card-tags { font-size: 0.45rem; margin-bottom: 0.15rem; }
+  .card-name { font-size: 0.85rem; }
+  .card-desc { display: none; }
+  .card-price { font-size: 0.88rem; }
+  .filters { gap: 0.25rem; }
+  .filter-btn { padding: 0.35rem 0.7rem; font-size: 0.52rem; }
   .mid-banner { padding: 2.5rem 1.2rem; }
   .mid-banner-inner { grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
   .mid-stat-num { font-size: 1.6rem; }
@@ -286,10 +276,9 @@ footer { padding: 3.5rem 2.5rem 1.5rem; background: var(--obsidian); color: var(
   .modal-name { font-size: 1.5rem; }
 }
 @media (max-width: 420px) {
-  .hero { height: 100px; }
-  .hero-text h1 { font-size: 1.1rem; }
-  .hero-ctas { display: none; }
-  .grid { gap: 0.5rem; }
-  .card-desc { display: none; }
-  .card-body { padding: 0.6rem; }
+  .banner { height: 60px !important; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+  .card-body { padding: 0.4rem 0.5rem; }
+  .card-tags { display: none; }
+  .card-name { font-size: 0.8rem; }
 }
