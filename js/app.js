@@ -262,11 +262,48 @@ function closeModal(e) {
   }
 }
 
+// ─── INLINE SEARCH ──────────────────────────────────────────
+function handleInlineSearch(query) {
+  // Clear active filter
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (query.length < 1) {
+    document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+    renderProducts('all');
+    return;
+  }
+  const q = query.toLowerCase();
+  const matches = products.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    (p.tags && p.tags.toLowerCase().includes(q)) ||
+    (p.desc && p.desc.toLowerCase().includes(q)) ||
+    (p.cat && p.cat.includes(q))
+  );
+  const grid = document.getElementById('productGrid');
+  if (!matches.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--smoke);font-size:0.88rem;">No products found</div>';
+    return;
+  }
+  grid.innerHTML = matches.map(p => `
+    <div class="card reveal vis" data-id="${p.id}">
+      <div class="card-img" onclick="openModal(${p.id})">
+        <div class="card-img-inner"><img src="${p.img}" alt="${p.name}" loading="lazy"></div>
+        <div class="card-quick"><button class="quick-add" onclick="event.stopPropagation();addToCart(products.find(x=>x.id===${p.id}))">Add to Bag — $${p.price}</button></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags">${p.tags}</div>
+        <div class="card-name" onclick="openModal(${p.id})">${p.name}</div>
+        <div class="card-desc">${p.desc}</div>
+        <div class="card-price">$${p.price}</div>
+      </div>
+    </div>`).join('');
+}
+
 // ─── FILTERS ────────────────────────────────────────────────
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    document.getElementById('inlineSearch').value = '';
     renderProducts(btn.dataset.filter);
   });
 });
@@ -275,6 +312,7 @@ function filterAndScroll(cat) {
   document.querySelectorAll('.filter-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.filter === cat);
   });
+  document.getElementById('inlineSearch').value = '';
   renderProducts(cat);
   closeMobileMenu();
 }
