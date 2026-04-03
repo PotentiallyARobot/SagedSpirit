@@ -63,7 +63,13 @@ nav.scrolled { padding: 0.7rem 2.5rem; box-shadow: 0 2px 30px rgba(61,50,40,0.05
 .announcement { background: var(--earth); color: var(--sand); text-align: center; padding: 0.55rem 1rem; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 400; position: fixed; top: 0; left: 0; right: 0; z-index: 101; }
 
 /* ─── BANNER ─── */
-.banner { width: 100%; }
+.banner { width: 100%; height: 180px; position: relative; overflow: hidden; }
+.banner-bg { position: absolute; inset: 0; background: url("assets/bg_hero.webp") center/cover no-repeat; }
+.banner-bg::after { content: ''; position: absolute; inset: 0; background: rgba(61,50,40,0.35); }
+.banner-text { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 2rem; }
+.banner-text h1 { font-family: var(--font-display); font-size: 1.8rem; font-weight: 300; color: var(--cream); line-height: 1.2; margin-bottom: 0.4rem; }
+.banner-text h1 em { font-style: italic; color: var(--sage-light); }
+.banner-text p { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,247,242,0.7); font-weight: 400; }
 
 /* ─── BUTTONS ─── */
 .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.4rem; font-family: var(--font-body); font-size: 0.62rem; letter-spacing: 0.13em; text-transform: uppercase; text-decoration: none; font-weight: 500; border: none; cursor: pointer; transition: all 0.35s ease; }
@@ -241,7 +247,9 @@ footer { padding: 3.5rem 2.5rem 1.5rem; background: var(--obsidian); color: var(
   nav { padding: 0.9rem 1.2rem; }
   nav.scrolled { padding: 0.7rem 1.2rem; }
   .nav-center { display: none; }
-  .banner { height: 80px !important; }
+  .banner { height: 140px !important; }
+  .banner-text h1 { font-size: 1.3rem; }
+  .banner-text p { font-size: 0.58rem; }
   .products { padding: 1rem 0.8rem 3rem; }
   .products-top { flex-direction: column; align-items: flex-start; margin-bottom: 0.8rem; }
   .products-heading { font-size: 1.3rem; }
@@ -276,7 +284,9 @@ footer { padding: 3.5rem 2.5rem 1.5rem; background: var(--obsidian); color: var(
   .modal-name { font-size: 1.5rem; }
 }
 @media (max-width: 420px) {
-  .banner { height: 60px !important; }
+  .banner { height: 110px !important; }
+  .banner-text h1 { font-size: 1rem; }
+  .banner-text p { display: none; }
   .grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
   .card-body { padding: 0.4rem 0.5rem; }
   .card-tags { display: none; }
