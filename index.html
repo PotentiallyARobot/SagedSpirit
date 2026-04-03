@@ -3,373 +3,370 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>embedding-adapters — MiniLM → text-embedding-3-large</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #08080e; color: #d8d8e0; min-height: 100vh; }
-  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px 60px; }
-  .brand { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #4a7aff; margin-bottom: 12px; }
-  h1 { font-size: 2rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
-  .tagline { color: #666; font-size: 0.92rem; margin-bottom: 6px; line-height: 1.5; }
-  .tagline code { background: #141422; padding: 2px 7px; border-radius: 3px; font-size: 0.82rem; color: #7eb8ff; }
-  .badge-row { display: flex; gap: 8px; margin: 16px 0 32px; flex-wrap: wrap; }
-  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-  .badge-blue { background: #1a2440; color: #5a9aff; }
-  .badge-green { background: #1a3020; color: #4ade80; }
-  .badge-purple { background: #251a40; color: #a78bfa; }
-  #loading { position: fixed; inset: 0; background: #08080e; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
-  #loading.done { opacity: 0; pointer-events: none; }
-  .load-msg { font-size: 1rem; color: #bbb; margin-bottom: 16px; }
-  .bar-out { width: 300px; height: 4px; background: #1a1a2e; border-radius: 2px; overflow: hidden; }
-  .bar-in { height: 100%; width: 0%; background: linear-gradient(90deg,#4a7aff,#7eb8ff); transition: width 0.2s; }
-  .load-sub { margin-top: 10px; font-size: 0.75rem; color: #444; }
-  .section { margin-bottom: 32px; }
-  .section-title { font-size: 0.78rem; color: #555; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
-  textarea { width: 100%; background: #0e0e1c; border: 1px solid #222240; border-radius: 8px; color: #ddd; padding: 12px 14px; font-family: inherit; font-size: 0.92rem; resize: vertical; outline: none; transition: border-color 0.2s; }
-  textarea:focus { border-color: #4a7aff; }
-  input[type="password"] { width: 100%; background: #0e0e1c; border: 1px solid #222240; border-radius: 8px; color: #ddd; padding: 10px 14px; font-family: inherit; font-size: 0.88rem; outline: none; }
-  input:focus { border-color: #4a7aff; }
-  .actions { display: flex; gap: 10px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
-  button { padding: 10px 22px; border: none; border-radius: 6px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-  button:disabled { opacity: 0.3; cursor: not-allowed; }
-  .btn-p { background: #4a7aff; color: #fff; }
-  .btn-p:hover:not(:disabled) { background: #5a8aff; transform: translateY(-1px); }
-  .btn-s { background: #161628; color: #888; border: 1px solid #222240; }
-  .btn-s:hover:not(:disabled) { background: #1c1c34; color: #aaa; }
-  .spin { display: none; width: 16px; height: 16px; border: 2px solid #4a7aff33; border-top-color: #4a7aff; border-radius: 50%; animation: spin 0.6s linear infinite; margin-left: 4px; }
-  .spin.on { display: inline-block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .card { background: #0e0e1c; border: 1px solid #222240; border-radius: 10px; padding: 18px; margin-top: 14px; }
-  .card-title { font-size: 0.72rem; color: #555; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px; }
-  .vec-text { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: 0.76rem; color: #6aabff; word-break: break-all; line-height: 1.7; max-height: 68px; overflow-y: auto; }
-  .quality-bar-wrap { margin-top: 14px; }
-  .quality-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .quality-label { font-size: 0.72rem; color: #555; text-transform: uppercase; letter-spacing: 0.4px; }
-  .quality-value { font-size: 1.1rem; font-weight: 700; }
-  .quality-track { width: 100%; height: 8px; background: #141422; border-radius: 4px; overflow: hidden; }
-  .quality-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease-out; }
-  .quality-explain { font-size: 0.73rem; color: #444; margin-top: 6px; line-height: 1.5; }
-  .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 8px; margin-top: 14px; }
-  .stat { background: #0a0a16; border-radius: 6px; padding: 10px 12px; }
-  .stat-l { font-size: 0.68rem; color: #444; text-transform: uppercase; letter-spacing: 0.3px; }
-  .stat-v { font-size: 1.1rem; font-weight: 700; color: #fff; margin-top: 2px; }
-  .stat-v.good { color: #4ade80; }
-  .matrix-wrap { overflow-x: auto; margin-top: 14px; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.74rem; }
-  th, td { padding: 7px 8px; border: 1px solid #1e1e38; text-align: center; }
-  th { background: #12121f; color: #666; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  td { font-family: 'SF Mono','Consolas',monospace; font-weight: 600; }
-  .tbl-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; font-weight: 600; }
-  .tbl-label.c-minilm { color: #f59e0b; }
-  .tbl-label.c-adapter { color: #7eb8ff; }
-  .tbl-label.c-openai { color: #4ade80; }
-  .tbl-wrap { margin-bottom: 20px; }
-  .api-note { font-size: 0.72rem; color: #444; margin-top: 8px; line-height: 1.5; }
-  .foot { margin-top: 36px; padding: 14px 18px; background: #0e0e1c; border: 1px solid #222240; border-radius: 10px; font-size: 0.76rem; color: #444; line-height: 1.7; }
-  .foot a { color: #4a7aff; text-decoration: none; }
-  .foot a:hover { text-decoration: underline; }
-</style>
+<title>sagedspirit — Ethically Sourced Crystals, Sage & Ritual Tools</title>
+<meta name="description" content="Shop ethically sourced crystals, white sage, and curated ritual kits at sagedspirit. Hand-selected minerals with real geological history. Free shipping over $75.">
+<meta name="keywords" content="crystals, sage, ritual tools, amethyst, smoky quartz, selenite, labradorite, rose quartz, citrine, white sage, palo santo, incense, crystal shop, metaphysical store, healing crystals, ethically sourced crystals">
+<meta name="robots" content="index, follow">
+<meta name="author" content="sagedspirit">
+<meta name="theme-color" content="#3D3228">
+
+<!-- Open Graph -->
+<meta property="og:site_name" content="sagedspirit">
+<meta property="og:title" content="sagedspirit — Ethically Sourced Crystals, Sage & Ritual Tools">
+<meta property="og:description" content="Hand-selected crystals with real geological history. White sage, palo santo, curated ritual kits. Free shipping over $75.">
+<meta property="og:image" content="https://www.sagedspirit.com/assets/hero_grounding_kit.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://www.sagedspirit.com">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="sagedspirit — Crystals, Sage & Ritual Tools">
+<meta name="twitter:description" content="Ethically sourced minerals with real geological history. Shop crystals, sage, and curated kits.">
+<meta name="twitter:image" content="https://www.sagedspirit.com/assets/hero_grounding_kit.webp">
+
+<link rel="canonical" href="https://www.sagedspirit.com">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🌿</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://js.stripe.com/v3/"></script>
+
+<!-- Structured Data: Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "sagedspirit",
+  "url": "https://www.sagedspirit.com",
+  "logo": "https://www.sagedspirit.com/assets/hero_grounding_kit.webp",
+  "description": "Ethically sourced crystals, sage, and ritual tools. Hand-selected for weight, texture, and formation.",
+  "email": "hello@sagedspirit.com",
+  "sameAs": [
+    "https://instagram.com/sagedspirit",
+    "https://tiktok.com/@sagedspirit"
+  ],
+  "priceRange": "$8 - $68",
+  "currenciesAccepted": "USD",
+  "paymentAccepted": "Credit Card, Debit Card",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Crystals, Sage & Ritual Tools",
+    "itemListElement": [
+      {"@type": "OfferCatalog", "name": "Crystals"},
+      {"@type": "OfferCatalog", "name": "Sage & Herbs"},
+      {"@type": "OfferCatalog", "name": "Incense"},
+      {"@type": "OfferCatalog", "name": "Curated Kits"}
+    ]
+  }
+}
+</script>
+
+<!-- Structured Data: Products -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "sagedspirit Collection",
+  "numberOfItems": 15,
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "item": {
+      "@type": "Product", "name": "Amethyst Tower", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/amethyst_tower.webp",
+      "description": "Polished amethyst point. Silicon dioxide with iron impurities. Origin: Brazil. 7 Mohs hardness.",
+      "offers": {"@type": "Offer", "price": "28.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "shippingDetails": {"@type": "OfferShippingDetails", "shippingRate": {"@type": "MonetaryAmount", "value": "0", "currency": "USD"}, "shippingDestination": {"@type": "DefinedRegion", "addressCountry": "US"}}}
+    }},
+    {"@type": "ListItem", "position": 2, "item": {
+      "@type": "Product", "name": "Black Tourmaline, Raw", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/black_tourmaline_raw.webp",
+      "description": "Unpolished piezoelectric tourmaline with natural striations. Origin: Brazil. 7 Mohs hardness.",
+      "offers": {"@type": "Offer", "price": "16.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 3, "item": {
+      "@type": "Product", "name": "White Sage Bundle", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/white_sage_bundle.webp",
+      "description": "Hand-harvested California white sage, air-dried and bundled. 4-inch bundle, burns 30-40 minutes.",
+      "offers": {"@type": "Offer", "price": "12.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 4, "item": {
+      "@type": "Product", "name": "Selenite Wand", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/selenite_wand.webp",
+      "description": "Polished selenite wand — hydrous calcium sulfate. Origin: Morocco. 2 Mohs hardness.",
+      "offers": {"@type": "Offer", "price": "22.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 5, "item": {
+      "@type": "Product", "name": "Smoky Quartz Point", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/smoky_quartz_point.webp",
+      "description": "Natural smoky quartz point with warm brown-to-amber translucency. Origin: Madagascar. 7 Mohs.",
+      "offers": {"@type": "Offer", "price": "34.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 6, "item": {
+      "@type": "Product", "name": "Citrine Cluster", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/citrine_cluster.webp",
+      "description": "Natural citrine cluster with honey-gold terminations. Origin: Brazil. 7 Mohs hardness.",
+      "offers": {"@type": "Offer", "price": "38.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 7, "item": {
+      "@type": "Product", "name": "Palo Santo & Sage Set", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/palo_santo_sage_set.webp",
+      "description": "Two palo santo sticks paired with a mini white sage bundle. Origin: Ecuador & California.",
+      "offers": {"@type": "Offer", "price": "18.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 8, "item": {
+      "@type": "Product", "name": "Labradorite Palm Stone", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/labradorite_palm_stone.webp",
+      "description": "Polished labradorite with iridescent flash. Origin: Madagascar. 6 Mohs hardness.",
+      "offers": {"@type": "Offer", "price": "26.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 9, "item": {
+      "@type": "Product", "name": "Cedar & Rosemary Bundle", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/cedar_rosemary_bundle.webp",
+      "description": "Hand-tied cedar and rosemary bundle. Origin: Pacific Northwest. Burns 25-35 minutes.",
+      "offers": {"@type": "Offer", "price": "14.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 10, "item": {
+      "@type": "Product", "name": "Clear Quartz Point", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/clear_quartz_point.webp",
+      "description": "Natural clear quartz point — pure SiO₂. Origin: Arkansas, USA. 7 Mohs hardness.",
+      "offers": {"@type": "Offer", "price": "24.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 11, "item": {
+      "@type": "Product", "name": "Nag Champa Incense", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/nag_champa_incense.webp",
+      "description": "Traditional hand-rolled nag champa incense. 15 sticks, 30 min burn each. Origin: Bangalore, India.",
+      "offers": {"@type": "Offer", "price": "8.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 12, "item": {
+      "@type": "Product", "name": "Rose Quartz Heart", "url": "https://www.sagedspirit.com/#shop",
+      "image": "https://www.sagedspirit.com/assets/rose_quartz_heart.webp",
+      "description": "Hand-carved rose quartz heart, polished to a soft satin finish. Origin: Madagascar. 7 Mohs.",
+      "offers": {"@type": "Offer", "price": "20.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 13, "item": {
+      "@type": "Product", "name": "The Grounding Kit", "url": "https://www.sagedspirit.com/#kits-section",
+      "image": "https://www.sagedspirit.com/assets/kit_grounding_unbox.webp",
+      "description": "Curated kit: Smoky Quartz Point, Black Tourmaline, White Sage, Grounding Salt Jar, Intention Card.",
+      "offers": {"@type": "Offer", "price": "58.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 14, "item": {
+      "@type": "Product", "name": "The Clarity Kit", "url": "https://www.sagedspirit.com/#kits-section",
+      "image": "https://www.sagedspirit.com/assets/kit_clarity_unbox.webp",
+      "description": "Curated kit: Clear Quartz Tower, Selenite Wand, Rosemary Bundle, Lavender Incense, Intention Card.",
+      "offers": {"@type": "Offer", "price": "62.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }},
+    {"@type": "ListItem", "position": 15, "item": {
+      "@type": "Product", "name": "The New Moon Kit", "url": "https://www.sagedspirit.com/#kits-section",
+      "image": "https://www.sagedspirit.com/assets/kit_new_moon_unbox.webp",
+      "description": "Curated kit: Labradorite Palm Stone, Amethyst Cluster, Palo Santo, Moon Phase Card, Black Salt Jar.",
+      "offers": {"@type": "Offer", "price": "68.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+    }}
+  ]
+}
+</script>
+
+<!-- Structured Data: Website Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "sagedspirit",
+  "url": "https://www.sagedspirit.com"
+}
+</script>
 </head>
 <body>
 
-<div id="loading">
-  <div class="load-msg" id="ld-msg">Initializing...</div>
-  <div class="bar-out"><div class="bar-in" id="bar"></div></div>
-  <div class="load-sub" id="ld-sub"></div>
+<div class="announcement">Free shipping on orders over $75 · Now shipping nationwide</div>
+
+<nav id="nav">
+  <div class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">saged<b>spirit</b></div>
+  <div class="nav-center">
+    <a href="#shop" onclick="filterAndScroll('all')">Shop All</a>
+    <a href="#shop" onclick="filterAndScroll('crystal')">Crystals</a>
+    <a href="#shop" onclick="filterAndScroll('sage')">Sage &amp; Herb</a>
+    <a href="#kits-section">Ritual Kits</a>
+    <a href="#about">Our Practice</a>
+    <a href="#visit-section">Visit</a>
+  </div>
+  <div class="nav-right">
+    <svg class="nav-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" onclick="toggleSearch()"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <button class="cart-trigger" onclick="toggleCart()">Bag <span class="cart-count" id="cartCount">0</span></button>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#shop" onclick="filterAndScroll('all');closeMobileMenu()">Shop All</a>
+  <a href="#shop" onclick="filterAndScroll('crystal');closeMobileMenu()">Crystals</a>
+  <a href="#shop" onclick="filterAndScroll('sage');closeMobileMenu()">Sage &amp; Herb</a>
+  <a href="#shop" onclick="filterAndScroll('incense');closeMobileMenu()">Incense</a>
+  <a href="#kits-section" onclick="closeMobileMenu()">Ritual Kits</a>
+  <a href="#about" onclick="closeMobileMenu()">Our Practice</a>
+  <a href="#visit-section" onclick="closeMobileMenu()">Visit</a>
 </div>
 
-<div class="container">
-  <div class="brand">embedding-adapters</div>
-  <h1>MiniLM → text-embedding-3-large</h1>
-  <p class="tagline">
-    Drop-in replacement for OpenAI's <code>text-embedding-3-large</code> — runs 100% in your browser.
-    Add your OpenAI key below to see a live accuracy comparison against the real API.
-  </p>
-  <div class="badge-row">
-    <span class="badge badge-blue">3072 dimensions</span>
-    <span class="badge badge-green">4-bit quantized</span>
-    <span class="badge badge-purple" id="badge-backend">loading...</span>
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)toggleSearch()">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search crystals, sage, kits..." autocomplete="off" oninput="handleSearch(this.value)">
+    <button onclick="toggleSearch()" class="search-close">✕</button>
   </div>
-
-  <!-- OpenAI key -->
-  <div class="section">
-    <div class="section-title">OpenAI API Key (optional — for live comparison)</div>
-    <input type="password" id="oai-key" placeholder="sk-...">
-    <div class="api-note">
-      Stays in your browser. Used only to call OpenAI's embedding API so you can compare adapter output
-      against the real thing. Without a key, you'll still see MiniLM and adapter results.
-    </div>
-  </div>
-
-  <!-- Single embed -->
-  <div class="section">
-    <div class="section-title">Embed text</div>
-    <textarea id="in1" rows="3" placeholder="How do neural networks learn?">How do neural networks learn?</textarea>
-    <div class="actions">
-      <button class="btn-p" id="btn-embed" disabled>Embed</button>
-      <button class="btn-s" id="btn-copy" disabled>Copy JSON</button>
-      <div class="spin" id="spin1"></div>
-    </div>
-  </div>
-
-  <div id="result" style="display:none">
-    <div class="card">
-      <div class="card-title">Adapted Embedding (3072d)</div>
-      <div class="vec-text" id="vec-out"></div>
-    </div>
-    <div class="card">
-      <div class="quality-bar-wrap">
-        <div class="quality-label-row">
-          <span class="quality-label">Adapter Confidence</span>
-          <span class="quality-value" id="q-val" style="color:#888">—</span>
-        </div>
-        <div class="quality-track"><div class="quality-fill" id="q-fill" style="width:0%;background:#333"></div></div>
-        <div class="quality-explain">
-          Self-assessed confidence in how faithfully this embedding replicates OpenAI's output.
-          Learned from training — the model reads its own internal state to predict fidelity without seeing the target.
-        </div>
-      </div>
-    </div>
-    <div class="card" id="match-card" style="display:none">
-      <div class="quality-bar-wrap">
-        <div class="quality-label-row">
-          <span class="quality-label">Actual Match vs OpenAI</span>
-          <span class="quality-value" id="m-val" style="color:#888">—</span>
-        </div>
-        <div class="quality-track"><div class="quality-fill" id="m-fill" style="width:0%;background:#333"></div></div>
-        <div class="quality-explain">
-          Cosine similarity between adapter output and the real text-embedding-3-large vector from OpenAI's API.
-          This is ground truth — values above 0.95 indicate strong replication.
-        </div>
-      </div>
-    </div>
-    <div class="stats">
-      <div class="stat"><div class="stat-l">Dimensions</div><div class="stat-v">3072</div></div>
-      <div class="stat"><div class="stat-l">L2 Norm</div><div class="stat-v" id="s-norm">—</div></div>
-      <div class="stat"><div class="stat-l">MiniLM</div><div class="stat-v" id="s-t1">—</div></div>
-      <div class="stat"><div class="stat-l">Adapter</div><div class="stat-v" id="s-t2">—</div></div>
-      <div class="stat"><div class="stat-l">Backend</div><div class="stat-v" id="s-back">—</div></div>
-    </div>
-  </div>
-
-  <!-- Comparison matrix -->
-  <div class="section" style="margin-top:40px">
-    <div class="section-title">Comparison Matrix</div>
-    <p class="tagline" style="margin-bottom:8px">
-      One text per line. Shows pairwise cosine similarities from up to three embedding spaces side by side.
-    </p>
-    <textarea id="in2" rows="5">Machine learning optimization
-How to train a neural network
-Best chocolate cake recipe
-Italian pasta dishes</textarea>
-    <div class="actions">
-      <button class="btn-p" id="btn-sim" disabled>Compare</button>
-      <div class="spin" id="spin2"></div>
-    </div>
-    <div class="matrix-wrap" id="sim-out"></div>
-  </div>
-
-  <div class="foot" id="foot">Loading model info...</div>
+  <div class="search-results" id="searchResults"></div>
 </div>
 
-<script type="module">
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1';
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-text reveal">
+      <h1>Crystals, sage<br>&amp; <em>ritual tools</em></h1>
+      <p class="hero-sub">Ethically sourced minerals with real geological history. Hand-selected for weight, texture, and formation. Online and in our store.</p>
+      <div class="hero-ctas">
+        <a href="#shop" class="btn btn-dark">Shop Now →</a>
+        <a href="#kits-section" class="btn btn-outline">Explore Kits</a>
+      </div>
+    </div>
+    <div class="hero-feature reveal">
+      <img src="assets/hero_grounding_kit.webp" alt="The Grounding Kit">
+      <div class="hero-badge">
+        <div class="hero-badge-label">New Arrival</div>
+        <div class="hero-badge-title">The Grounding Kit — $58</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-const HF_REPO = 'TylerF/all-MiniLM-L6-v2_to_text-embedding-3-large';
-const hfUrl = f => `https://huggingface.co/${HF_REPO}/resolve/main/${f}`;
-const BLOCK_SIZE = 64;
-const $ = id => document.getElementById(id);
-function prog(p,m,s){$('bar').style.width=p+'%';if(m)$('ld-msg').textContent=m;if(s!==undefined)$('ld-sub').textContent=s;}
+<!-- PRODUCTS -->
+<section class="products" id="shop">
+  <div class="products-top reveal">
+    <h2 class="products-heading">The collection</h2>
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="crystal">Crystals</button>
+      <button class="filter-btn" data-filter="sage">Sage &amp; Herb</button>
+      <button class="filter-btn" data-filter="incense">Incense</button>
+    </div>
+  </div>
+  <div class="grid" id="productGrid"></div>
+</section>
 
-function fp16(h){const s=(h>>15)&1,e=(h>>10)&0x1F,f=h&0x3FF;if(e===0)return f===0?(s?-0:0):(s?-1:1)*(f/1024)*2**-14;if(e===31)return f?NaN:(s?-Infinity:Infinity);return(s?-1:1)*2**(e-15)*(1+f/1024);}
+<!-- MID BANNER -->
+<section class="mid-banner">
+  <div class="mid-banner-inner reveal">
+    <div class="mid-stat"><div class="mid-stat-num">10K–200M</div><div class="mid-stat-label">Years in formation</div></div>
+    <div class="mid-stat"><div class="mid-stat-num">100%</div><div class="mid-stat-label">Ethically sourced &amp; traceable</div></div>
+    <div class="mid-stat"><div class="mid-stat-num">4–7</div><div class="mid-stat-label">Mohs hardness scale</div></div>
+  </div>
+</section>
 
-function dequantLayer(buf,layer){
-  const[rows,cols]=layer.shape,pad=(BLOCK_SIZE-(cols%BLOCK_SIZE))%BLOCK_SIZE,paddedCols=cols+pad;
-  const packed=new Uint8Array(buf,layer.offset,layer.packed_size),scalesU16=new Uint16Array(buf,layer.scales_offset,layer.n_blocks_per_row*rows);
-  const out=new Float32Array(rows*cols),bpr=layer.n_blocks_per_row;
-  for(let r=0;r<rows;r++){const rp=r*(paddedCols>>1),rs=r*bpr;
-    for(let b=0;b<bpr;b++){const s=fp16(scalesU16[rs+b]),c0=b*BLOCK_SIZE,p0=rp+(c0>>1);
-      for(let j=0;j<BLOCK_SIZE;j+=2){const byte=packed[p0+(j>>1)],col0=c0+j,col1=c0+j+1;
-        if(col0<cols)out[r*cols+col0]=((byte>>4)-8)*s;if(col1<cols)out[r*cols+col1]=((byte&0xF)-8)*s;}}}return out;}
+<!-- KITS -->
+<section class="kits" id="kits-section">
+  <div class="kits-top reveal"><h2 class="products-heading">Curated kits</h2></div>
+  <div class="kits-grid" id="kitsGrid"></div>
+</section>
 
-function loadF16Layer(buf,layer){const n=layer.shape.reduce((a,b)=>a*b,1),u16=new Uint16Array(buf,layer.offset,n),out=new Float32Array(n);for(let i=0;i<n;i++)out[i]=fp16(u16[i]);return out;}
+<!-- ABOUT -->
+<section class="about-strip" id="about">
+  <div class="about-inner">
+    <div class="about-img reveal"><img src="assets/lifestyle_hands_crystal.webp" alt="Hands holding crystal"></div>
+    <div class="about-text reveal">
+      <h2>Amethyst is silicon dioxide<br>with <em>iron impurities</em></h2>
+      <p>That's what gives it color. Tourmaline generates a measurable electrical charge under pressure. Quartz oscillates at precise frequencies — which is why it's in every watch you've ever worn.</p>
+      <p>We don't need to embellish what's already remarkable. Every piece in this collection is sourced with care, selected by hand, and presented with honesty about what we know and what we don't.</p>
+      <div class="about-facts">
+        <div class="about-fact"><strong>Sourced From</strong><span>Brazil, Madagascar, US</span></div>
+        <div class="about-fact"><strong>Selected</strong><span>By hand, always</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-class Adapter{
-  constructor(m,buf){this.m=m;this.w={};this.useGPU=false;this.device=null;for(const l of m.layers)this.w[l.name]=l.dtype==='int4'?dequantLayer(buf,l):loadF16Layer(buf,l);}
-  async tryWebGPU(){if(!navigator.gpu)return false;try{const a=await navigator.gpu.requestAdapter();if(!a)return false;this.device=await a.requestDevice({requiredLimits:{maxStorageBufferBindingSize:268435456,maxBufferSize:268435456}});this.useGPU=true;this._build();return true;}catch(e){return false;}}
-  _build(){this._sh=this.device.createShaderModule({code:`@group(0)@binding(0)var<storage,read>A:array<f32>;@group(0)@binding(1)var<storage,read>B:array<f32>;@group(0)@binding(2)var<storage,read_write>C:array<f32>;@group(0)@binding(3)var<uniform>d:vec3<u32>;@compute@workgroup_size(8,8)fn main(@builtin(global_invocation_id)g:vec3<u32>){let M=d.x;let N=d.y;let K=d.z;if(g.x>=M||g.y>=N){return;}var s:f32=0.0;for(var k:u32=0u;k<K;k++){s+=A[g.x*K+k]*B[g.y*K+k];}C[g.x*N+g.y]=s;}`});this._pi=this.device.createComputePipeline({layout:'auto',compute:{module:this._sh,entryPoint:'main'}});}
-  async _gpu(a,M,K,b,N){const d=this.device,bA=d.createBuffer({size:a.byteLength,usage:GPUBufferUsage.STORAGE,mappedAtCreation:true});new Float32Array(bA.getMappedRange()).set(a);bA.unmap();const bB=d.createBuffer({size:b.byteLength,usage:GPUBufferUsage.STORAGE,mappedAtCreation:true});new Float32Array(bB.getMappedRange()).set(b);bB.unmap();const oS=M*N*4,bC=d.createBuffer({size:oS,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC}),bD=d.createBuffer({size:12,usage:GPUBufferUsage.UNIFORM,mappedAtCreation:true});new Uint32Array(bD.getMappedRange()).set([M,N,K]);bD.unmap();const bg=d.createBindGroup({layout:this._pi.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:bA}},{binding:1,resource:{buffer:bB}},{binding:2,resource:{buffer:bC}},{binding:3,resource:{buffer:bD}}]});const ce=d.createCommandEncoder(),p=ce.beginComputePass();p.setPipeline(this._pi);p.setBindGroup(0,bg);p.dispatchWorkgroups(Math.ceil(M/8),Math.ceil(N/8));p.end();const rB=d.createBuffer({size:oS,usage:GPUBufferUsage.MAP_READ|GPUBufferUsage.COPY_DST});ce.copyBufferToBuffer(bC,0,rB,0,oS);d.queue.submit([ce.finish()]);await rB.mapAsync(GPUMapMode.READ);const r=new Float32Array(rB.getMappedRange().slice(0));rB.unmap();bA.destroy();bB.destroy();bC.destroy();bD.destroy();rB.destroy();return r;}
-  _cpu(v,w,oD,iD){const o=new Float32Array(oD);for(let i=0;i<oD;i++){let s=0;const off=i*iD;for(let j=0;j<iD;j++)s+=v[j]*w[off+j];o[i]=s;}return o;}
-  async _lin(x,wN,bN,oD,iD){const w=this.w[wN],b=this.w[bN];let o=(this.useGPU&&oD*iD>50000)?await this._gpu(x,1,iD,w,oD):this._cpu(x,w,oD,iD);for(let i=0;i<oD;i++)o[i]+=b[i];return o;}
-  _ln(x,wN,bN){const n=x.length,w=this.w[wN],b=this.w[bN];let mu=0;for(let i=0;i<n;i++)mu+=x[i];mu/=n;let va=0;for(let i=0;i<n;i++){const d=x[i]-mu;va+=d*d;}va/=n;const sd=Math.sqrt(va+1e-5),o=new Float32Array(n);for(let i=0;i<n;i++)o[i]=((x[i]-mu)/sd)*w[i]+b[i];return o;}
-  _selu(x){const a=1.6732632423543772,s=1.0507009873554805,o=new Float32Array(x.length);for(let i=0;i<x.length;i++)o[i]=x[i]>0?s*x[i]:s*a*(Math.exp(x[i])-1);return o;}
-  _gelu(x){const o=new Float32Array(x.length);for(let i=0;i<x.length;i++){const v=x[i];o[i]=0.5*v*(1+Math.tanh(Math.sqrt(2/Math.PI)*(v+0.044715*v*v*v)));}return o;}
-  _norm(x){let n=0;for(let i=0;i<x.length;i++)n+=x[i]*x[i];n=Math.sqrt(n);const o=new Float32Array(x.length);if(n>1e-8)for(let i=0;i<x.length;i++)o[i]=x[i]/n;return o;}
+<!-- VISIT -->
+<section class="visit" id="visit-section">
+  <div class="reveal">
+    <h2>Some things you need<br>to <em>hold first</em></h2>
+    <p>Our retail space is designed for slowness. Come in, take your time, feel the weight of things.</p>
+    <div class="visit-grid">
+      <div class="visit-item"><h4>Location</h4><p>Opening 2026 · TBA</p></div>
+      <div class="visit-item"><h4>Hours</h4><p>Tue–Sat 10–6, Sun 11–4</p></div>
+      <div class="visit-item"><h4>Contact</h4><p>hello@sagedspirit.com</p></div>
+      <div class="visit-item"><h4>Social</h4><p><a href="https://instagram.com/sagedspirit" target="_blank" rel="noopener">@sagedspirit</a></p></div>
+    </div>
+  </div>
+  <div class="visit-map reveal"><img src="assets/store_interior.webp" alt="sagedspirit store"></div>
+</section>
 
-  async forward(vec){
-    const H=this.m.hidden_dim,S=this.m.source_dim,T=this.m.target_dim;
-    let h=this._ln(new Float32Array(vec),'in_norm.weight','in_norm.bias');const hn=new Float32Array(h);
-    const hL=this.m.layers.filter(l=>l.name.startsWith('hidden.')&&l.name.endsWith('.weight')&&l.dtype==='int4').sort((a,b)=>parseInt(a.name.split('.')[1])-parseInt(b.name.split('.')[1]));
-    let iD=S;for(const l of hL){const i=l.name.split('.')[1];h=await this._lin(h,`hidden.${i}.weight`,`hidden.${i}.bias`,H,iD);h=this._selu(h);iD=H;}
-    const ho=new Float32Array(h);
-    let out=await this._lin(h,'final_proj.weight','final_proj.bias',T,H);
-    if(this.m.use_skip){const sk=await this._lin(hn,'skip.weight','skip.bias',T,S);for(let i=0;i<T;i++)out[i]+=sk[i];}
-    out=this._ln(out,'out_norm.weight','out_norm.bias');const emb=this._norm(out);
-    let q=null;
-    if(this.m.has_quality_head){const qI=new Float32Array(H+S);qI.set(ho,0);qI.set(hn,H);let qh=await this._lin(qI,'quality_head.0.weight','quality_head.0.bias',this.m.quality_hidden,H+S);qh=this._gelu(qh);let qO=this._cpu(qh,this.w['quality_head.2.weight'],1,this.m.quality_hidden);qO[0]+=this.w['quality_head.2.bias'][0];q=1/(1+Math.exp(-qO[0]));}
-    return{embedding:emb,quality:q};
-  }
-}
+<!-- NEWSLETTER -->
+<section class="newsletter">
+  <div class="reveal">
+    <h2>New arrivals, moon notes, honest writing</h2>
+    <p>A slow newsletter. No spam.</p>
+    <form class="nl-form" id="nlForm" onsubmit="handleNewsletter(event)">
+      <input type="email" class="nl-input" id="nlEmail" placeholder="Your email" required>
+      <button type="submit" class="nl-btn" id="nlBtn">Subscribe</button>
+    </form>
+  </div>
+</section>
 
-// ─── OpenAI ───
-async function oaiEmbed(text,key){
-  const r=await fetch('https://api.openai.com/v1/embeddings',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'text-embedding-3-large',input:text})});
-  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`OpenAI ${r.status}`);}
-  const d=await r.json();return new Float32Array(d.data[0].embedding);
-}
-async function oaiBatch(texts,key){
-  const r=await fetch('https://api.openai.com/v1/embeddings',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'text-embedding-3-large',input:texts})});
-  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`OpenAI ${r.status}`);}
-  const d=await r.json();return d.data.sort((a,b)=>a.index-b.index).map(x=>new Float32Array(x.embedding));
-}
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo">saged<b>spirit</b></div>
+      <p>Ethically sourced crystals, sage, and ritual tools. Rooted in geological history, carried with you.</p>
+    </div>
+    <div class="footer-col"><h4>Shop</h4>
+      <a href="#shop" onclick="filterAndScroll('crystal')">Crystals</a>
+      <a href="#shop" onclick="filterAndScroll('sage')">Sage &amp; Herbs</a>
+      <a href="#kits-section">Ritual Kits</a>
+      <a href="#shop" onclick="filterAndScroll('incense')">Incense</a>
+    </div>
+    <div class="footer-col"><h4>Info</h4>
+      <a href="#about">Our Practice</a>
+      <a href="#visit-section">Visit Us</a>
+      <a href="mailto:hello@sagedspirit.com">Contact</a>
+    </div>
+    <div class="footer-col"><h4>Connect</h4>
+      <a href="https://instagram.com/sagedspirit" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://tiktok.com/@sagedspirit" target="_blank" rel="noopener">TikTok</a>
+      <a href="mailto:hello@sagedspirit.com">Email Us</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 sagedspirit. All rights reserved.</span>
+    <span>sagedspirit.com</span>
+  </div>
+</footer>
 
-const dot=(a,b)=>{let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s;};
-function qCol(q){return q>=0.9?'#4ade80':q>=0.8?'#a3e635':q>=0.7?'#fbbf24':'#f87171';}
-function simCol(s){const h=s>0.7?140:s>0.4?55:0;return`hsl(${h},${Math.round(Math.min(Math.abs(s)*90,80))}%,68%)`;}
-function mCol(c){return c>=0.98?'#4ade80':c>=0.95?'#a3e635':c>=0.9?'#fbbf24':'#f87171';}
-const getKey=()=>$('oai-key').value.trim();
-const esc=t=>t.replace(/"/g,'&quot;');
-const trunc=(t,n)=>t.length>n?t.slice(0,n)+'…':t;
+<!-- CART DRAWER -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <div class="cart-title">Your Bag</div>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"><div class="cart-empty">Your bag is empty</div></div>
+  <div class="cart-footer" id="cartFooter" style="display:none;">
+    <div class="cart-subtotal">
+      <span class="cart-subtotal-label">Subtotal</span>
+      <span class="cart-subtotal-val" id="cartSubtotal">$0</span>
+    </div>
+    <div class="cart-shipping">Shipping calculated at checkout</div>
+    <button class="checkout-btn" onclick="handleCheckout()">Checkout →</button>
+  </div>
+</div>
 
-let extractor=null,adapter=null,backendName='CPU';
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';">✕</button>
+    <div class="modal-img" id="modalImg"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
 
-async function init(){
-  try{
-    prog(3,'Loading model manifest...','');
-    const mR=await fetch(hfUrl('layer_manifest.json'));if(!mR.ok)throw new Error(`Manifest: ${mR.status}`);
-    const manifest=await mR.json();const totalMB=(manifest.total_bytes/1e6).toFixed(0);
-    prog(5,`Downloading adapter (${totalMB} MB)...`,'');
-    const wR=await fetch(hfUrl('weights.bin'));if(!wR.ok)throw new Error(`Weights: ${wR.status}`);
-    let wBuf;const cl=wR.headers.get('content-length');
-    if(cl&&wR.body){const tot=parseInt(cl),reader=wR.body.getReader(),chunks=[];let got=0;
-      while(true){const{done,value}=await reader.read();if(done)break;chunks.push(value);got+=value.length;prog(5+(got/tot)*40,`Downloading adapter (${totalMB} MB)...`,`${(got/1e6).toFixed(1)} / ${totalMB} MB`);}
-      const all=new Uint8Array(got);let p=0;for(const c of chunks){all.set(c,p);p+=c.length;}wBuf=all.buffer;
-    }else{wBuf=await wR.arrayBuffer();}
-    prog(47,'Dequantizing 4-bit weights...','');adapter=new Adapter(manifest,wBuf);
-    prog(52,'Checking GPU...','');const gpu=await adapter.tryWebGPU();backendName=gpu?'WebGPU':'CPU';
-    $('badge-backend').textContent=gpu?'⚡ WebGPU':'🖥 CPU';$('badge-backend').className=gpu?'badge badge-green':'badge badge-purple';
-    prog(55,'Loading MiniLM...','~30 MB, cached after first visit');
-    extractor=await pipeline('feature-extraction','Xenova/all-MiniLM-L6-v2',{progress_callback:p=>{if(p.status==='progress'&&p.progress)prog(55+p.progress*0.4,'Loading MiniLM...',p.file?`${p.file} — ${p.progress.toFixed(0)}%`:'');}});
-    prog(96,'Warming up...','');await extractor('warmup',{pooling:'mean',normalize:true});await adapter.forward(new Float32Array(manifest.source_dim));
-    prog(100,'Ready!','');setTimeout(()=>$('loading').classList.add('done'),400);
-    $('btn-embed').disabled=false;$('btn-sim').disabled=false;
-    $('foot').innerHTML=`<strong>Model:</strong> ${manifest.source_dim}d → ${manifest.hidden_dim}-wide → ${manifest.target_dim}d | 4-bit (${totalMB} MB) | ${backendName} | R@10: ${manifest['best_hard_R@10']?.toFixed(4)??'N/A'}<br>All inference runs locally in your browser.`;
-  }catch(e){prog(0,'❌ '+e.message,'');console.error(e);}
-}
-
-async function embedOne(text){
-  const t0=performance.now(),raw=await extractor(text,{pooling:'mean',normalize:true}),minilmVec=new Float32Array(raw.data),t1=performance.now();
-  const{embedding,quality}=await adapter.forward(minilmVec),t2=performance.now();
-  let norm=0;for(let i=0;i<embedding.length;i++)norm+=embedding[i]*embedding[i];norm=Math.sqrt(norm);
-  return{minilmVec,embedding,quality,norm,tM:t1-t0,tA:t2-t1};
-}
-
-// ─── Single embed ───
-let lastRes=null;
-$('btn-embed').onclick=async()=>{
-  const text=$('in1').value.trim();if(!text)return;$('btn-embed').disabled=true;$('spin1').classList.add('on');
-  const r=await embedOne(text);lastRes=r;
-  $('result').style.display='';
-  $('vec-out').textContent='['+Array.from(r.embedding).slice(0,24).map(v=>v.toFixed(6)).join(', ')+', ...]';
-  if(r.quality!==null){const p=(r.quality*100).toFixed(1),c=qCol(r.quality);$('q-val').textContent=p+'%';$('q-val').style.color=c;$('q-fill').style.width=p+'%';$('q-fill').style.background=c;}
-  $('s-norm').textContent=r.norm.toFixed(4);$('s-norm').className='stat-v'+(Math.abs(r.norm-1)<0.01?' good':'');
-  $('s-t1').textContent=r.tM.toFixed(0)+'ms';$('s-t2').textContent=r.tA.toFixed(0)+'ms';$('s-back').textContent=backendName;
-  const key=getKey();
-  if(key){try{const ov=await oaiEmbed(text,key),m=dot(r.embedding,ov),mp=(m*100).toFixed(1),mc=mCol(m);$('match-card').style.display='';$('m-val').textContent=mp+'%';$('m-val').style.color=mc;$('m-fill').style.width=mp+'%';$('m-fill').style.background=mc;}catch(e){$('match-card').style.display='';$('m-val').textContent='Error';$('m-val').style.color='#f87171';$('m-fill').style.width='0%';console.error(e);}}
-  else{$('match-card').style.display='none';}
-  $('btn-embed').disabled=false;$('btn-copy').disabled=false;$('spin1').classList.remove('on');
-};
-
-$('btn-copy').onclick=()=>{if(!lastRes)return;navigator.clipboard.writeText(JSON.stringify({embedding:Array.from(lastRes.embedding),quality:lastRes.quality,dimensions:3072}));$('btn-copy').textContent='✓ Copied';setTimeout(()=>$('btn-copy').textContent='Copy JSON',1500);};
-
-// ─── Comparison matrix ───
-function buildTable(label, labelClass, texts, vecs, extraCols) {
-  let h = `<div class="tbl-wrap"><div class="tbl-label ${labelClass}">${label}</div>`;
-  h += '<table><tr><th></th>';
-  for (const t of texts) h += `<th title="${esc(t)}">${trunc(t, 22)}</th>`;
-  if (extraCols) for (const ec of extraCols) h += `<th style="color:${ec.color}">${ec.header}</th>`;
-  h += '</tr>';
-  for (let i = 0; i < texts.length; i++) {
-    h += `<tr><th title="${esc(texts[i])}">${trunc(texts[i], 22)}</th>`;
-    for (let j = 0; j < texts.length; j++) {
-      const s = dot(vecs[i], vecs[j]);
-      h += `<td style="color:${simCol(s)}">${s.toFixed(3)}</td>`;
-    }
-    if (extraCols) for (const ec of extraCols) {
-      const v = ec.values[i];
-      const col = ec.colorFn ? ec.colorFn(v) : '#888';
-      h += `<td style="color:${col}">${ec.format(v)}</td>`;
-    }
-    h += '</tr>';
-  }
-  h += '</table></div>';
-  return h;
-}
-
-$('btn-sim').onclick = async () => {
-  const texts = $('in2').value.split('\n').map(s => s.trim()).filter(Boolean);
-  if (texts.length < 2) return;
-  $('btn-sim').disabled = true; $('spin2').classList.add('on');
-
-  const mVecs = [], aVecs = [], quals = [];
-  for (let i = 0; i < texts.length; i++) {
-    $('btn-sim').textContent = `Embedding ${i+1}/${texts.length}`;
-    const r = await embedOne(texts[i]);
-    mVecs.push(r.minilmVec); aVecs.push(r.embedding); quals.push(r.quality);
-  }
-
-  const key = getKey();
-  let oVecs = null, matches = null;
-  if (key) {
-    try {
-      $('btn-sim').textContent = 'Calling OpenAI...';
-      oVecs = await oaiBatch(texts, key);
-      matches = aVecs.map((a, i) => dot(a, oVecs[i]));
-    } catch (e) { console.error('OpenAI:', e); oVecs = null; }
-  }
-
-  let html = '';
-
-  // MiniLM table
-  html += buildTable('MiniLM (384d) — raw source model', 'c-minilm', texts, mVecs, null);
-
-  // Adapter table with quality + match columns
-  const adapterExtra = [
-    { header: 'Quality', color: '#a78bfa', values: quals, colorFn: q => q !== null ? qCol(q) : '#555', format: v => v !== null ? (v*100).toFixed(1)+'%' : '—' }
-  ];
-  if (matches) {
-    adapterExtra.push({ header: 'vs OpenAI', color: '#4ade80', values: matches, colorFn: mCol, format: v => (v*100).toFixed(1)+'%' });
-  }
-  html += buildTable('Adapter (3072d) — adapted to text-embedding-3-large space', 'c-adapter', texts, aVecs, adapterExtra);
-
-  // OpenAI table
-  if (oVecs) {
-    html += buildTable('OpenAI text-embedding-3-large (3072d) — ground truth', 'c-openai', texts, oVecs, null);
-  }
-
-  $('sim-out').innerHTML = html;
-  $('btn-sim').disabled = false; $('btn-sim').textContent = 'Compare'; $('spin2').classList.remove('on');
-};
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-    if (document.activeElement === $('in1')) $('btn-embed').click();
-    else if (document.activeElement === $('in2')) $('btn-sim').click();
-  }
-});
-
-init();
-</script>
+<script src="js/app.js"></script>
 </body>
 </html>
